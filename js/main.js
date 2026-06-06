@@ -2,7 +2,8 @@
 const GameState = {
     MENU: 0,
     PLAYING: 1,
-    SETTINGS: 2
+    SETTINGS: 2,
+    GAMEOVER: 3
 };
 
 const Game = {
@@ -19,6 +20,9 @@ const Game = {
     levelNum: 1,
     timeScale: 1.0,
     slowMoTimer: 0,
+    shakeX: 0,
+    shakeY: 0,
+    shakeIntensity: 0,
     
     settings: {
         soundEnabled: true,
@@ -42,6 +46,14 @@ const Game = {
         }
         this.ctx = this.canvas.getContext('2d');
         
+        // HiDPI / Retina: масштабуємо канвас до фізичних пікселів
+        this.dpr = window.devicePixelRatio || 1;
+        if (this.dpr > 1) {
+            this.canvas.width = 800 * this.dpr;
+            this.canvas.height = 600 * this.dpr;
+            this.ctx.scale(this.dpr, this.dpr);
+        }
+        
         Input.init(this.canvas);
         this.loadSettings();
         this.initUI();
@@ -62,7 +74,9 @@ const Game = {
         
         const setVal = (id, val) => {
             const el = document.getElementById(`slider-${id}`);
-            if (el) el.value = val;
+            if (el) { el.value = val; }
+            const span = document.getElementById(`val-${id}`);
+            if (span) span.textContent = val;
         };
         setVal('gravity',  this.settings.gravity);
         setVal('recoil',   this.settings.recoilForce);
@@ -92,6 +106,15 @@ const Game = {
         });
 
         document.getElementById('btn-back').addEventListener('click', () => {
+            this.changeState(GameState.MENU);
+        });
+        
+        document.getElementById('btn-retry').addEventListener('click', () => {
+            this.levelNum = 1;
+            this.changeState(GameState.PLAYING);
+        });
+        document.getElementById('btn-retry-menu').addEventListener('click', () => {
+            this.levelNum = 1;
             this.changeState(GameState.MENU);
         });
         
@@ -192,6 +215,8 @@ const Game = {
             if (hudEl) hudEl.classList.add('active');
             if (this.canvas) this.canvas.style.display = 'block';
             this.startLevel();
+        } else if (newState === GameState.GAMEOVER) {
+            document.getElementById('gameover-menu').classList.add('active');
         }
     },
 
@@ -395,8 +420,9 @@ const Game = {
                     this.player.hp -= 10;
                     bulletRemoved = true;
                     this.playSound('hit');
+                    this.shakeIntensity = Math.min(this.shakeIntensity + 8, 16);
                     if (this.player.hp <= 0) {
-                        this.startLevel();
+                        this.changeState(GameState.GAMEOVER);
                         return;
                     }
                 }
@@ -423,6 +449,20 @@ const Game = {
     draw() {
         if (this.state !== GameState.PLAYING) return;
 
+        // ── Screen shake ──
+        if (this.shakeIntensity > 0) {
+            this.shakeX = (Math.random() - 0.5) * this.shakeIntensity;
+            this.shakeY = (Math.random() - 0.5) * this.shakeIntensity;
+            this.shakeIntensity *= 0.9;
+            if (this.shakeIntensity < 0.5) this.shakeIntensity = 0;
+            this.ctx.save();
+            this.ctx.translate(this.shakeX, this.shakeY);
+        } else if (this.shakeX !== 0) {
+            this.ctx.restore();
+            this.shakeX = 0;
+            this.shakeY = 0;
+        }
+        
         // ── Небо / фон ──
         const skyGrad = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
         skyGrad.addColorStop(0, '#5BB3D9');
@@ -437,6 +477,9 @@ const Game = {
         this.bullets.forEach(b => b.draw(this.ctx));
         this.enemyBullets.forEach(eb => eb.draw(this.ctx));
         if (this.player) this.player.draw(this.ctx);
+        if (this.shakeIntensity > 0) {
+            this.ctx.restore();
+        }
         this.ctx.restore();
 
         // ── HUD (оновлення DOM) ──

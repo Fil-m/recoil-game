@@ -18,6 +18,11 @@ class Player {
         this.gripHeight = 40;
 
         this.fireCooldown = 0;
+        
+        // Для прицілювання: коли гравець торкається/клікає — цілимо туди
+        this.targetAngle = null;
+        this.aimStrength = 0.15; // Як швидко пістолет повертається до цілі
+        
         this.buffs = {
             machinegun:   0,
             super_recoil: 0,
@@ -74,6 +79,32 @@ class Player {
 
         // ── Обертання ──
         this.angle += this.angularVelocity * dt;
+        
+        // ── Прицілювання по дотику/миші ──
+        const aimX = Input.mouse.x + (Game.camera ? Game.camera.x : 0);
+        const aimY = Input.mouse.y + (Game.camera ? Game.camera.y : 0);
+        const dxAim = aimX - this.x;
+        const dyAim = aimY - this.y;
+        const distToAim = Math.hypot(dxAim, dyAim);
+        
+        // Цілимося тільки якщо дотик активний або миша натиснута
+        // І тільки якщо ціль достатньо далеко (щоб не смикатись при собі)
+        const isAiming = (Input.touch.active || Input.mouse.down) && distToAim > 30;
+        if (isAiming) {
+            this.targetAngle = Math.atan2(dyAim, dxAim);
+        } else {
+            this.targetAngle = null;
+        }
+        
+        // Плавне повертання до цілі (з урахуванням фізики)
+        if (this.targetAngle !== null) {
+            let diff = this.targetAngle - this.angle;
+            while (diff > Math.PI) diff -= Math.PI * 2;
+            while (diff < -Math.PI) diff += Math.PI * 2;
+            // М'яке притягування до цілі (сильніше якщо палець на екрані)
+            const pull = Input.touch.active ? 0.12 : 0.06;
+            this.angularVelocity += diff * pull * 60 * dt;
+        }
 
         // ── Колізії з рівнем ──
         if (level) {
