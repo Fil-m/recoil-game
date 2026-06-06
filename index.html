@@ -33,21 +33,28 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
 
         canvas {
             display: none;
-            max-width: 100%;
-            max-height: 100%;
-            aspect-ratio: 4 / 3;
+            width: 100%;
+            height: 100%;
             background: #87CEEB;
-            border-radius: 8px;
-            box-shadow: 0 0 40px rgba(100, 200, 255, 0.3);
             touch-action: none;
-            object-fit: contain;
+            object-fit: cover;
         }
+        /* На горизонтальних екранах — більше повітря зверху */
+        @media (orientation: landscape) {
+            canvas { object-fit: contain; border-radius: 8px; }
+        }
+        /* На дуже маленьких — без заокруглень */
         @media (max-height: 500px) {
-            canvas { border-radius: 0; box-shadow: none; }
+            canvas { border-radius: 0; }
+        }
+        /* Підкладка під канвас (синій фон завжди на весь екран) */
+        #game-wrapper {
+            background: #0a0a0f;
         }
 
         /* ─── Screens ─── */
