@@ -282,6 +282,32 @@ const Game = {
             b.update(scaledDt, this.level, this.level.enemies);
             let bulletRemoved = false;
             let explosion = false;
+            
+            // ⏱ Сповільнення часу ПЕРЕД попаданням (bullet time)
+            const SLOWMO_TRIGGER = 140; // дистанція до ворога для активації
+            let nearEnemySlow = false;
+            for (let enemy of this.level.enemies) {
+                if (enemy.active) {
+                    const dx = b.x - (enemy.x + enemy.w / 2);
+                    const dy = b.y - (enemy.y + enemy.h / 2);
+                    if (dx * dx + dy * dy < SLOWMO_TRIGGER * SLOWMO_TRIGGER) {
+                        nearEnemySlow = true;
+                        break;
+                    }
+                }
+            }
+            // Також перевіряємо боса
+            if (!nearEnemySlow && this.level.boss && this.level.boss.active) {
+                const bx = this.level.boss.x + this.level.boss.w / 2;
+                const by = this.level.boss.y + this.level.boss.h / 2;
+                if ((b.x - bx) * (b.x - bx) + (b.y - by) * (b.y - by) < (SLOWMO_TRIGGER * 1.5) * (SLOWMO_TRIGGER * 1.5)) {
+                    nearEnemySlow = true;
+                }
+            }
+            if (nearEnemySlow) {
+                this.slowMoTimer = this.settings.slowmoDuration ?? 0.6;
+                this.timeScale = this.settings.slowmoSpeed ?? 0.35;
+            }
             if (this.level) {
                 for (let enemy of this.level.enemies) {
                     if (enemy.active && b.x > enemy.x && b.x < enemy.x + enemy.w &&
@@ -291,8 +317,9 @@ const Game = {
                         if (enemy.hp <= 0) {
                             enemy.active = false;
                             this.score += 50;
+                            // Невеликий імпакт-фріз після вбивства
+                            this.slowMoTimer = 0.15;
                             this.timeScale = this.settings.slowmoSpeed ?? 0.35;
-                            this.slowMoTimer = this.settings.slowmoDuration ?? 0.6;
                         }
                         if (b.type === 'grenade') explosion = true;
                         bulletRemoved = (b.type !== 'laser');
@@ -307,8 +334,8 @@ const Game = {
                         this.playSound('hit');
                         if (boss.hp <= 0) {
                             boss.active = false;
+                            this.slowMoTimer = 0.3;
                             this.timeScale = this.settings.slowmoSpeed ?? 0.35;
-                            this.slowMoTimer = (this.settings.slowmoDuration ?? 0.6) * 2.0; // бос — вдвічі довше
                         }
                         bulletRemoved = true;
                     }

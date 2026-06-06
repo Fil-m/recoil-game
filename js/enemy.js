@@ -2,8 +2,8 @@ class Enemy {
     constructor(x, y, type = 'normal') {
         this.x = x;
         this.y = y;
-        this.w = 30;
-        this.h = 50;
+        this.w = 50;
+        this.h = 72;
         this.hp = 1;
         this.maxHp = 1;
         this.active = true;
@@ -115,11 +115,11 @@ class Enemy {
         // Очі
         ctx.fillStyle = '#fff';
         if (this.vx > 0) {
-            ctx.fillRect(this.x + this.w / 2, this.y + 10, 5, 5);
-            ctx.fillRect(this.x + this.w / 2 + 10, this.y + 10, 5, 5);
+            ctx.fillRect(this.x + this.w / 2 - 8, this.y + 15, 7, 7);
+            ctx.fillRect(this.x + this.w / 2 + 6, this.y + 15, 7, 7);
         } else {
-            ctx.fillRect(this.x + 5, this.y + 10, 5, 5);
-            ctx.fillRect(this.x + 15, this.y + 10, 5, 5);
+            ctx.fillRect(this.x + 8, this.y + 15, 7, 7);
+            ctx.fillRect(this.x + 26, this.y + 15, 7, 7);
         }
         
         // Смужка здоров'я

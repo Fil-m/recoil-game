@@ -26,8 +26,14 @@
             position: relative;
             width: 100%;
             max-width: 800px;
-            aspect-ratio: 4 / 3;
+            height: 100vh;
+            height: 100dvh;
             margin: auto;
+        }
+        @media (max-width: 700px) {
+            #game-wrapper { max-width: 100%; }
+            .stats { font-size: 11px !important; }
+            .hp-bar-wrap { width: 100px !important; }
         }
 
         canvas {
@@ -86,8 +92,8 @@
 
         /* ─── Buttons ─── */
         .btn {
-            padding: 14px 36px;
-            font-size: 18px;
+            padding: 18px 44px;
+            font-size: 20px;
             font-family: 'Inter', sans-serif;
             font-weight: 600;
             border: none;
@@ -137,12 +143,15 @@
                 grid-template-columns: 1fr;
             }
             #main-menu h1 {
-                font-size: 40px;
+                font-size: 34px;
             }
             .btn {
-                padding: 10px 20px;
-                font-size: 16px;
+                padding: 16px 32px;
+                font-size: 18px;
+                min-height: 52px;
             }
+            .btn-row { gap: 12px; flex-direction: column; }
+            #main-menu p { font-size: 13px; }
         }
 
         .setting-row {
@@ -273,7 +282,7 @@
             <button id="btn-play" class="btn btn-primary">▶ ГРАТИ</button>
             <button id="btn-settings" class="btn btn-secondary">⚙ НАЛАШТУВАННЯ</button>
         </div>
-        <p class="tip">ЛКМ, ПРОБІЛ або ТАЧ — постріл / рух</p>
+        <p class="tip">📱 Торкнись екрана — цілься та стріляй</p>
     </div>
 
     <!-- Меню налаштувань -->
