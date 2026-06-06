@@ -2,15 +2,17 @@ class Enemy {
     constructor(x, y, type = 'normal') {
         this.x = x;
         this.y = y;
-        this.w = 50;
-        this.h = 72;
+        const s = Game.scale || 1;
+        this.w = 50 * s;
+        this.h = 72 * s;
         this.hp = 1;
         this.maxHp = 1;
         this.active = true;
         this.type = type;
         
         // Патрулювання
-        this.vx = (Math.random() > 0.5 ? 1 : -1) * 60;
+        const s = Game.scale || 1;
+        this.vx = (Math.random() > 0.5 ? 1 : -1) * 60 * s;
         this.vy = 0;
         
         // Стрільба (кожні 5-10 секунд)
@@ -86,7 +88,7 @@ class Enemy {
             const angle = Math.atan2(dy, dx);
             
             // Якщо гравець далеко, не стріляємо
-            if (Math.hypot(dx, dy) < 800) {
+            if (Math.hypot(dx, dy) < 800 * (Game.scale || 1)) {
                 return new EnemyBullet(this.x + this.w / 2, this.y + this.h / 2, angle);
             }
         }

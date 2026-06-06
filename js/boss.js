@@ -3,8 +3,9 @@ class Boss {
     constructor(x, y, levelNum) {
         this.x = x;
         this.y = y;
-        this.w = 120;
-        this.h = 120;
+        const s = Game.scale || 1;
+        this.w = 120 * s;
+        this.h = 120 * s;
         this.levelNum = levelNum;
         
         // Здоров'я залежить від рівня

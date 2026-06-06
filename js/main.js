@@ -20,6 +20,7 @@ const Game = {
     levelNum: 1,
     timeScale: 1.0,
     slowMoTimer: 0,
+    scale: 1,
     shakeX: 0,
     shakeY: 0,
     shakeIntensity: 0,
@@ -46,15 +47,9 @@ const Game = {
         }
         this.ctx = this.canvas.getContext('2d');
         
-        // HiDPI / Retina: фізичні пікселі, але ЛОГІЧНИЙ розмір 800×600
-        this.dpr = window.devicePixelRatio || 1;
-        this.logicalW = 800;
-        this.logicalH = 600;
-        if (this.dpr > 1) {
-            this.canvas.width = this.logicalW * this.dpr;
-            this.canvas.height = this.logicalH * this.dpr;
-            this.ctx.scale(this.dpr, this.dpr);
-        }
+        // ── ДИНАМІЧНИЙ РОЗМІР ПІД ЕКРАН ──
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
         
         Input.init(this.canvas);
         this.loadSettings();
@@ -64,6 +59,29 @@ const Game = {
         this.changeState(GameState.MENU);
         
         requestAnimationFrame((time) => this.loop(time));
+    },
+    
+    resize() {
+        this.dpr = window.devicePixelRatio || 1;
+        // Заповнюємо ВЕСЬ екран (без фіксованих 800×600)
+        const maxW = window.innerWidth;
+        const maxH = window.innerHeight;
+        // Логічний розмір = розмір вікна (в CSS пікселях)
+        this.logicalW = maxW;
+        this.logicalH = maxH;
+        // Фізичний розмір для чіткості на Retina
+        this.canvas.width = maxW * this.dpr;
+        this.canvas.height = maxH * this.dpr;
+        this.canvas.style.width = maxW + 'px';
+        this.canvas.style.height = maxH + 'px';
+        this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+        
+        // Масштаб: всі об'єкти адаптуються під екран
+        // Референс: гра розрахована на висоту ~600px
+        this.scale = this.logicalH / 600;
+        if (this.scale < 0.4) this.scale = 0.4; // не менше ніж 40%
+        if (this.scale > 2.0) this.scale = 2.0; // не більше ніж 200%
+        console.log(`Resized: ${this.logicalW}x${this.logicalH}, scale=${this.scale.toFixed(2)}, dpr=${this.dpr}`);
     },
 
     loadSettings() {
@@ -264,7 +282,7 @@ const Game = {
             }
         }
         if (this.player && this.level) {
-            const pr = 30;
+            const pr = 30 * this.scale;
             this.level.coins.forEach(c => {
                 if (!c.collected && Math.hypot(this.player.x - c.x, this.player.y - c.y) < pr + c.radius) {
                     c.collected = true;
@@ -323,7 +341,7 @@ const Game = {
             let explosion = false;
             
             // ⏱ Сповільнення часу ПЕРЕД попаданням (bullet time)
-            const SLOWMO_TRIGGER = 140; // дистанція до ворога для активації
+            const SLOWMO_TRIGGER = 140 * this.scale; // дистанція до ворога для активації
             let nearEnemySlow = false;
             for (let enemy of this.level.enemies) {
                 if (enemy.active) {
@@ -418,7 +436,7 @@ const Game = {
             let bulletRemoved = false;
             if (this.player) {
                 const dist = Math.hypot(this.player.x - eb.x, this.player.y - eb.y);
-                if (dist < 30 + eb.radius) {
+                if (dist < 30 * this.scale + eb.radius) {
                     this.player.hp -= 10;
                     bulletRemoved = true;
                     this.playSound('hit');

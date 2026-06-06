@@ -16,6 +16,7 @@ class Player {
         this.barrelHeight = 16;
         this.gripWidth  = 16;
         this.gripHeight = 40;
+        this.s = 1; // буде встановлено в update
 
         this.fireCooldown = 0;
         
@@ -42,6 +43,8 @@ class Player {
     }
 
     update(dt, level) {
+        this.s = Game.scale || 1;
+        this.collisionRadius = 24 * this.s;
         this.onGround = false;
         // ── Таймери ──
         if (this.fireCooldown > 0) this.fireCooldown -= dt;
@@ -54,14 +57,14 @@ class Player {
         // ── Гравітація ──
         const gravity = (Game.settings && Game.settings.gravity != null)
             ? Game.settings.gravity : 1800;
-        this.vy += gravity * dt;
+        this.vy += gravity * (this.s || 1) * dt;
 
         // ── Рух ──
         this.x += this.vx * dt;
         this.y += this.vy * dt;
 
         // ── Обмеження швидкості ──
-        const maxVy = 3500, maxVx = 3000;
+        const maxVy = 3500 * (this.s || 1), maxVx = 3000 * (this.s || 1);
         if (this.vy >  maxVy) this.vy =  maxVy;
         if (this.vy < -maxVy) this.vy = -maxVy;
         if (this.vx >  maxVx) this.vx =  maxVx;
@@ -108,7 +111,7 @@ class Player {
 
         // ── Колізії з рівнем ──
         if (level) {
-            const R = this.collisionRadius;
+            const R = this.collisionRadius * this.s;
 
             // Ліва межа рівня
             if (this.x - R < 0) {
@@ -170,8 +173,8 @@ class Player {
         this.fireCooldown = isMachineGun ? 0.06 : (isLaser ? 0.03 : 0.18);
 
         // ── Сила відштовхування ──
-        let recoilForce = (Game.settings && Game.settings.recoilForce != null)
-            ? Game.settings.recoilForce : 1000;
+        let recoilForce = ((Game.settings && Game.settings.recoilForce != null)
+            ? Game.settings.recoilForce : 1000) * (this.s || 1);
         if (this.buffs.super_recoil > 0) recoilForce *= 2.0;
         if (this.buffs.weak_recoil  > 0) recoilForce *= 0.5;
 

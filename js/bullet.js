@@ -7,27 +7,28 @@ class Bullet {
         this.active = true;
         
         let speed = 1500;
-        this.radius = 4;
+        this.radius = 4 * (Game.scale || 1);
         this.damage = 1;
         
         if (type === 'bazooka') {
             speed = 800;
-            this.radius = 12;
+            this.radius = 12 * (Game.scale || 1);
             this.damage = 10;
         } else if (type === 'grenade') {
             speed = 600;
-            this.radius = 8;
+            this.radius = 8 * (Game.scale || 1);
             this.damage = 5;
         } else if (type === 'laser') {
             speed = 5000;
-            this.radius = 2;
+            this.radius = 2 * (Game.scale || 1);
             this.damage = 2;
         } else if (type === 'homing') {
             speed = 1000;
-            this.radius = 5;
+            this.radius = 5 * (Game.scale || 1);
         }
         
-        this.vx = Math.cos(angle) * speed;
+        const s = Game.scale || 1;
+        this.vx = Math.cos(angle) * speed * s;
         this.vy = Math.sin(angle) * speed;
     }
     
@@ -35,7 +36,7 @@ class Bullet {
         if (this.type === 'homing' && enemies) {
             // Пошук найближчого ворога
             let nearest = null;
-            let minDist = 600;
+            let minDist = 600 * (Game.scale || 1);
             enemies.forEach(e => {
                 if (e.active) {
                     let d = Math.hypot(e.x - this.x, e.y - this.y);

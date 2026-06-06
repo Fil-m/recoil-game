@@ -53,8 +53,9 @@ class Level {
         for (let i = 0; i < obstacleCount; i++) {
             const x = 500 + Math.random() * 3200;
             const isStone = this.levelNum >= 10 && Math.random() > 0.5;
-            const w = 40;
-            const h = 40;
+            const s = Game.scale || 1;
+            const w = 40 * s;
+            const h = 40 * s;
             const y = this.getHeightAt(x + w/2) - h;
             
             this.obstacles.push({
@@ -69,8 +70,9 @@ class Level {
         const stalactiteCount = 10 + this.levelNum;
         for (let i = 0; i < stalactiteCount; i++) {
             const x = 800 + Math.random() * 3000;
-            const w = 30;
-            const h = 80 + Math.random() * 150;
+            const s = Game.scale || 1;
+            const w = 30 * s;
+            const h = (80 + Math.random() * 150) * s;
             
             this.obstacles.push({
                 x: x, y: 0, w: w, h: h, 

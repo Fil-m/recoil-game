@@ -4,7 +4,7 @@ class Coin {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.radius = 12;
+        this.radius = 12 * (Game.scale || 1);
         this.collected = false;
         
         // Для анімації підстрибування
@@ -42,7 +42,7 @@ class Upgrade {
     constructor(x, y, type) {
         this.x = x;
         this.y = y;
-        this.radius = 15;
+        this.radius = 15 * (Game.scale || 1);
         this.type = type; // 'machinegun', 'super_recoil', 'double_shot'
         this.collected = false;
         
