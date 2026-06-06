@@ -80,12 +80,12 @@ const Game = {
 
     initUI() {
         document.getElementById('btn-play').addEventListener('click', () => {
-            // Резюмуємо аудіо-контекст при першому кліку (критично для мобільних)
-            if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
-            
             this.changeState(GameState.PLAYING);
         });
+        
+        // Аудіо на мобільних: створюємо контекст при першому дотику ДЕ ЗАВГОДНО
+        document.addEventListener('touchstart', () => { this.ensureAudio(); }, { once: true });
+        document.addEventListener('click', () => { this.ensureAudio(); }, { once: true });
 
         document.getElementById('btn-settings').addEventListener('click', () => {
             this.changeState(GameState.SETTINGS);
@@ -125,16 +125,28 @@ const Game = {
         setupSlider('global-speed',    'globalSpeed');
     },
 
+    ensureAudio() {
+        if (!this.audioCtx) {
+            try {
+                this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch(e) { return null; }
+        }
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().catch(() => {});
+        }
+        return this.audioCtx;
+    },
+
     playSound(type) {
         if (!this.settings.soundEnabled) return;
+        const ctx = this.ensureAudio();
+        if (!ctx) return;
         try {
-            if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
-            const osc = this.audioCtx.createOscillator();
-            const gain = this.audioCtx.createGain();
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
             osc.connect(gain);
-            gain.connect(this.audioCtx.destination);
-            const now = this.audioCtx.currentTime;
+            gain.connect(ctx.destination);
             if (type === 'shoot') {
                 osc.type = 'square';
                 osc.frequency.setValueAtTime(150, now);
