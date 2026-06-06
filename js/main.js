@@ -46,11 +46,13 @@ const Game = {
         }
         this.ctx = this.canvas.getContext('2d');
         
-        // HiDPI / Retina: масштабуємо канвас до фізичних пікселів
+        // HiDPI / Retina: фізичні пікселі, але ЛОГІЧНИЙ розмір 800×600
         this.dpr = window.devicePixelRatio || 1;
+        this.logicalW = 800;
+        this.logicalH = 600;
         if (this.dpr > 1) {
-            this.canvas.width = 800 * this.dpr;
-            this.canvas.height = 600 * this.dpr;
+            this.canvas.width = this.logicalW * this.dpr;
+            this.canvas.height = this.logicalH * this.dpr;
             this.ctx.scale(this.dpr, this.dpr);
         }
         
@@ -434,14 +436,14 @@ const Game = {
         }
         if (this.player) {
             // Horizontal: гравець завжди по центру
-            const targetCamX = this.player.x - this.canvas.width / 2;
+            const targetCamX = this.player.x - this.logicalW / 2;
             this.camera.x += (targetCamX - this.camera.x) * 8 * dt;
             if (this.camera.x < 0) this.camera.x = 0;
-            if (this.camera.x > this.level.width - this.canvas.width) {
-                this.camera.x = this.level.width - this.canvas.width;
+            if (this.camera.x > this.level.width - this.logicalW) {
+                this.camera.x = this.level.width - this.logicalW;
             }
             // Vertical: гравець завжди по центру
-            const targetCamY = this.player.y - this.canvas.height / 2;
+            const targetCamY = this.player.y - this.logicalH / 2;
             this.camera.y += (targetCamY - this.camera.y) * 8 * dt;
         }
     },
@@ -464,11 +466,11 @@ const Game = {
         }
         
         // ── Небо / фон ──
-        const skyGrad = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        const skyGrad = this.ctx.createLinearGradient(0, 0, 0, this.logicalH);
         skyGrad.addColorStop(0, '#5BB3D9');
         skyGrad.addColorStop(1, '#A8D8EA');
         this.ctx.fillStyle = skyGrad;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillRect(0, 0, this.logicalW, this.logicalH);
 
         // ── Ігровий світ ──
         this.ctx.save();

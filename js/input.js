@@ -17,8 +17,10 @@ const Input = {
         // Обробка миші
         const updateMousePos = (clientX, clientY) => {
             const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
+            const logW = Game.logicalW || canvas.width;
+            const logH = Game.logicalH || canvas.height;
+            const scaleX = logW / rect.width;
+            const scaleY = logH / rect.height;
             this.mouse.x = (clientX - rect.left) * scaleX;
             this.mouse.y = (clientY - rect.top) * scaleY;
         };
