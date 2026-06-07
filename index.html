@@ -237,7 +237,9 @@
         #hud {
             display: none;
             position: absolute;
-            top: 0; left: 0; right: 0;
+            top: env(safe-area-inset-top, 0px);
+            left: env(safe-area-inset-left, 0px);
+            right: env(safe-area-inset-right, 0px);
             padding: 12px 16px;
             pointer-events: none;
             z-index: 5;
@@ -306,7 +308,7 @@
             <button id="btn-play" class="btn btn-primary">▶ ГРАТИ</button>
             <button id="btn-settings" class="btn btn-secondary">⚙ НАЛАШТУВАННЯ</button>
         </div>
-        <p class="tip">📱 Торкнись екрана — цілься та стріляй</p>
+        <p class="tip">📱 Ліва половина: цілитись | Права: стріляти</p>
     </div>
 
     <!-- Меню налаштувань -->

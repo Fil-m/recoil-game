@@ -77,10 +77,12 @@ const Game = {
         this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
         
         // Масштаб: всі об'єкти адаптуються під екран
-        // Референс: гра розрахована на висоту ~600px
-        this.scale = this.logicalH / 600;
-        if (this.scale < 0.4) this.scale = 0.4; // не менше ніж 40%
-        if (this.scale > 2.0) this.scale = 2.0; // не більше ніж 200%
+        // Референс: 800x600
+        const scaleW = this.logicalW / 800;
+        const scaleH = this.logicalH / 600;
+        this.scale = Math.min(scaleW, scaleH);
+        if (this.scale < 0.45) this.scale = 0.45; 
+        if (this.scale > 2.0) this.scale = 2.0;
         console.log(`Resized: ${this.logicalW}x${this.logicalH}, scale=${this.scale.toFixed(2)}, dpr=${this.dpr}`);
     },
 
@@ -272,7 +274,8 @@ const Game = {
         if (this.player && this.level) {
             this.player.update(scaledDt, this.level);
         }
-        if (Input.mouse.down || Input.keys['Space']) {
+        const isShooting = Input.mouse.down || Input.keys['Space'] || Input.touchFire.active;
+        if (isShooting) {
             if (this.player) {
                 const newBullets = this.player.shoot();
                 if (newBullets && newBullets.length > 0) {

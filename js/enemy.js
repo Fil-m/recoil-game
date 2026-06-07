@@ -11,7 +11,6 @@ class Enemy {
         this.type = type;
         
         // Патрулювання
-        const s = Game.scale || 1;
         this.vx = (Math.random() > 0.5 ? 1 : -1) * 60 * s;
         this.vy = 0;
         

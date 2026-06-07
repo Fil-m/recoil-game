@@ -2,7 +2,8 @@
 const Input = {
     keys: {},
     mouse: { x: 0, y: 0, clicked: false, down: false },
-    touch: { active: false, x: 0, y: 0 },
+    touchAim: { active: false, x: 0, y: 0 },
+    touchFire: { active: false, clicked: false },
 
     init(canvas) {
         // Обробка клавіатури
@@ -43,32 +44,56 @@ const Input = {
         });
 
         // Обробка тач-подій (для мобільних)
+        const handleTouches = (e) => {
+            let aimActive = false;
+            let fireActive = false;
+            
+            const rect = canvas.getBoundingClientRect();
+            const logW = Game.logicalW || canvas.width;
+            const logH = Game.logicalH || canvas.height;
+            const scaleX = logW / rect.width;
+            const scaleY = logH / rect.height;
+
+            for (let i = 0; i < e.touches.length; i++) {
+                const touch = e.touches[i];
+                // Ліва половина екрана — прицілювання
+                if (touch.clientX < window.innerWidth / 2) {
+                    aimActive = true;
+                    this.touchAim.x = (touch.clientX - rect.left) * scaleX;
+                    this.touchAim.y = (touch.clientY - rect.top) * scaleY;
+                } else {
+                    // Права половина — стрільба
+                    if (!this.touchFire.active) {
+                        this.touchFire.clicked = true;
+                    }
+                    fireActive = true;
+                }
+            }
+            
+            this.touchAim.active = aimActive;
+            this.touchFire.active = fireActive;
+        };
+
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            const touch = e.touches[0];
-            updateMousePos(touch.clientX, touch.clientY);
-            this.touch.active = true;
-            this.touch.x = this.mouse.x;
-            this.touch.y = this.mouse.y;
-            this.mouse.clicked = true;
-            this.mouse.down = true;
+            handleTouches(e);
         }, { passive: false });
 
         canvas.addEventListener('touchmove', (e) => {
             e.preventDefault();
-            const touch = e.touches[0];
-            updateMousePos(touch.clientX, touch.clientY);
-            this.touch.active = true;
-            this.touch.x = this.mouse.x;
-            this.touch.y = this.mouse.y;
+            handleTouches(e);
         }, { passive: false });
 
         canvas.addEventListener('touchend', (e) => {
             e.preventDefault();
-            this.mouse.down = false;
-            this.touch.active = false;
+            handleTouches(e);
         }, { passive: false });
         
+        canvas.addEventListener('touchcancel', (e) => {
+            e.preventDefault();
+            handleTouches(e);
+        }, { passive: false });
+
         // Обробка контекстного меню (щоб не заважало при кліках)
         canvas.addEventListener('contextmenu', (e) => {
             e.preventDefault();
@@ -77,5 +102,6 @@ const Input = {
 
     clear() {
         this.mouse.clicked = false;
+        this.touchFire.clicked = false;
     }
 };

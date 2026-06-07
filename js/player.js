@@ -84,16 +84,22 @@ class Player {
         this.angle += this.angularVelocity * dt;
         
         // ── Прицілювання по дотику/миші ──
-        const aimX = Input.mouse.x + (Game.camera ? Game.camera.x : 0);
-        const aimY = Input.mouse.y + (Game.camera ? Game.camera.y : 0);
-        const dxAim = aimX - this.x;
-        const dyAim = aimY - this.y;
-        const distToAim = Math.hypot(dxAim, dyAim);
+        let isAiming = false;
+        let aimX = 0, aimY = 0;
+
+        if (Input.touchAim.active) {
+            isAiming = true;
+            aimX = Input.touchAim.x + (Game.camera ? Game.camera.x : 0);
+            aimY = Input.touchAim.y + (Game.camera ? Game.camera.y : 0);
+        } else if (Input.mouse.down) {
+            aimX = Input.mouse.x + (Game.camera ? Game.camera.x : 0);
+            aimY = Input.mouse.y + (Game.camera ? Game.camera.y : 0);
+            isAiming = Math.hypot(aimX - this.x, aimY - this.y) > 30;
+        }
         
-        // Цілимося тільки якщо дотик активний або миша натиснута
-        // І тільки якщо ціль достатньо далеко (щоб не смикатись при собі)
-        const isAiming = (Input.touch.active || Input.mouse.down) && distToAim > 30;
         if (isAiming) {
+            const dxAim = aimX - this.x;
+            const dyAim = aimY - this.y;
             this.targetAngle = Math.atan2(dyAim, dxAim);
         } else {
             this.targetAngle = null;
@@ -105,7 +111,7 @@ class Player {
             while (diff > Math.PI) diff -= Math.PI * 2;
             while (diff < -Math.PI) diff += Math.PI * 2;
             // М'яке притягування до цілі (сильніше якщо палець на екрані)
-            const pull = Input.touch.active ? 0.12 : 0.06;
+            const pull = Input.touchAim.active ? 0.12 : 0.06;
             this.angularVelocity += diff * pull * 60 * dt;
         }
 
